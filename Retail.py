@@ -15,3 +15,4 @@ print(data.describe())
 # Check missing values per column
 print(data.isnull().sum())
 
+#hi
