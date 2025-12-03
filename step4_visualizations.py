@@ -10,8 +10,9 @@ data = pd.read_csv("clustered_data.csv")
 # Make Seaborn plots look cleaner
 sns.set(style="whitegrid")
 
-
+# ==========================================
 # 4.1 — Bar Chart: Number of customers per cluster
+# ==========================================
 
 cluster_counts = data["cluster"].value_counts()
 
@@ -22,9 +23,9 @@ plt.xlabel("Cluster")
 plt.ylabel("Count of Customers")
 plt.show()
 
-
-
+# ==========================================
 # 4.2 — Boxplot: Annual Income by Cluster
+# ==========================================
 
 plt.figure(figsize=(6, 4))
 sns.boxplot(x="cluster", y="annual_income", data=data)
@@ -33,24 +34,31 @@ plt.xlabel("Cluster")
 plt.ylabel("Annual Income")
 plt.show()
 
-
-
-# 4.3 — Spending comparisons by cluster
+# ==========================================
+# 4.3 — Spending Comparisons by Cluster
+# ==========================================
 
 spending_cols = [
     'spend_wine', 'spend_meat', 'spend_fruits',
     'spend_fish', 'spend_sweets', 'spend_gold'
 ]
 
-# Boxplot showing the distribution of spending for all customers
-plt.figure(figsize=(10, 6))
-sns.boxplot(data=data[spending_cols])
-plt.title("Distribution of Spending Across All Customers")
-plt.ylabel("Amount Spent")
+# Better visualization: melt into long format
+data_melted = data.melt(
+    id_vars="cluster",
+    value_vars=spending_cols,
+    var_name="Category",
+    value_name="Spending"
+)
+
+plt.figure(figsize=(12, 6))
+sns.boxplot(x="Category", y="Spending", hue="cluster", data=data_melted)
+plt.title("Spending Distribution per Category by Cluster")
 plt.xticks(rotation=45)
+plt.ylabel("Amount Spent")
 plt.show()
 
-# Barplots comparing spending for each category by cluster
+# Individual barplots (optional but useful)
 for col in spending_cols:
     plt.figure(figsize=(6, 4))
     sns.barplot(x="cluster", y=col, data=data)
@@ -59,9 +67,9 @@ for col in spending_cols:
     plt.ylabel(col)
     plt.show()
 
-
-
-# 4.4 — Activity: Days since last purchase by cluster
+# ==========================================
+# 4.4 — Activity: Days Since Last Purchase by Cluster
+# ==========================================
 
 plt.figure(figsize=(6, 4))
 sns.boxplot(x="cluster", y="days_since_last_purchase", data=data)
@@ -70,14 +78,17 @@ plt.xlabel("Cluster")
 plt.ylabel("Days Since Last Purchase")
 plt.show()
 
-# 4.5 — Heatmap: Average feature values per cluster
+# ==========================================
+# 4.5 — Heatmap: Average Numeric Feature Values per Cluster
+# ==========================================
 
-# Compute mean values for each feature grouped by cluster
-cluster_means = data.groupby("cluster").mean()
+# Select only numeric features to avoid errors
+numeric_cols = data.select_dtypes(include='number').columns
+cluster_means = data.groupby("cluster")[numeric_cols].mean()
 
 plt.figure(figsize=(14, 8))
 sns.heatmap(cluster_means, annot=True, cmap="coolwarm", fmt=".1f")
-plt.title("Cluster Profile Heatmap")
+plt.title("Cluster Profile Heatmap (Numeric Features Only)")
 plt.show()
 
-print("Step 4 complete: Visualizations generated.")
+print("Step 4 complete: Visualizations generated successfully.")

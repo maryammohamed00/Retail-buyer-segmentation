@@ -3,6 +3,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
 # Load data with cluster labels
@@ -10,12 +11,14 @@ data = pd.read_csv("clustered_data.csv")
 
 #Input
 X = data[[
-    'annual_income', 
-    'spend_wine', 'spend_meat', 'spend_fruits',
-    'spend_fish', 'spend_sweets', 'spend_gold',
-    'num_web_purchases', 'num_store_purchases',
-    'num_catalog_purchases', 'num_discount_purchases',
-    'days_since_last_purchase', 'web_visits_last_month'
+     'annual_income',
+    'total_spend',
+    'total_purchases',
+    'family_size',
+    'age',
+    'num_discount_purchases',
+    'days_since_last_purchase',
+    'web_visits_last_month'
 ]]
 
 #Output
@@ -43,9 +46,9 @@ y_pred_knn = knn.predict(X_test_scaled)
 #Evaluation
 print("KNN Results:")
 print("Accuracy:", accuracy_score(y_test, y_pred_knn))
-print("Precision:", precision_score(y_test, y_pred_knn))
-print("Recall:", recall_score(y_test, y_pred_knn))
-print("F1 Score:", f1_score(y_test, y_pred_knn))
+print("Precision:", precision_score(y_test, y_pred_knn,  pos_label=1))  #cluster 1 label is considered “positive.”
+print("Recall:", recall_score(y_test, y_pred_knn,  pos_label=1))
+print("F1 Score:", f1_score(y_test, y_pred_knn,  pos_label=1))
 print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_knn))
 
 # Train Decision Tree
@@ -58,10 +61,31 @@ y_pred_dt = dt.predict(X_test)
 #Evaluation/
 print("\nDecision Tree Results:")
 print("Accuracy:", accuracy_score(y_test, y_pred_dt))
-print("Precision:", precision_score(y_test, y_pred_dt))
-print("Recall:", recall_score(y_test, y_pred_dt))
-print("F1 Score:", f1_score(y_test, y_pred_dt))
+print("Precision:", precision_score(y_test, y_pred_dt,  pos_label=1))
+print("Recall:", recall_score(y_test, y_pred_dt, pos_label=1))
+print("F1 Score:", f1_score(y_test, y_pred_dt, pos_label=1 ))
 print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_dt))
 
-#more models - randomfirst, logistic, svm, decision tree -> voting
-#check if over or under fitting is needed
+#Random Forest : MANY decision trees, each tree gets result,  majority voting on results -> stable outcome , prevents overfitting
+
+# ============================================
+# ✦ BONUS MODEL — RANDOM FOREST
+# ============================================
+
+# Random Forest does NOT need scaling, but you can use scaled or unscaled. 
+# We use unscaled (the original X_train, X_test) for best performance.
+rf = RandomForestClassifier(
+    n_estimators=200,        # more trees = better accuracy (200 trees)
+    max_depth=None,         # let trees fully grow
+    random_state=42
+)
+
+rf.fit(X_train, y_train)
+y_pred_rf = rf.predict(X_test)
+
+print("\nRandom Forest Results (BONUS):")
+print("Accuracy:", accuracy_score(y_test, y_pred_rf))
+print("Precision:", precision_score(y_test, y_pred_rf,  pos_label=1))
+print("Recall:", recall_score(y_test, y_pred_rf,  pos_label=1))
+print("F1 Score:", f1_score(y_test, y_pred_rf,  pos_label=1))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_rf))
