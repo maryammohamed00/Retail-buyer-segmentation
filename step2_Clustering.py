@@ -3,16 +3,20 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
 
 data = pd.read_csv("cleaned_data.csv")
 
 features = [
-    'annual_income', 
-    'spend_wine', 'spend_meat', 'spend_fruits',
-    'spend_fish', 'spend_sweets', 'spend_gold',
-    'num_web_purchases', 'num_store_purchases',
-    'num_catalog_purchases', 'num_discount_purchases',
-    'days_since_last_purchase', 'web_visits_last_month'
+    'annual_income',
+    'total_spend',
+    'total_purchases',
+    'family_size',
+    'age',
+    'num_discount_purchases',
+    'days_since_last_purchase',
+    'web_visits_last_month'
 ]
 
 X = data[features]
@@ -89,7 +93,6 @@ data["cluster"] = kmeans.fit_predict(X_scaled)
 print("Number of customers in each cluster:")
 print(data["cluster"].value_counts())
 
-
 # STEP 2.7 — Analyze the clusters
 
 print("Cluster Summary (average values for each segment):")
@@ -98,5 +101,46 @@ print(cluster_summary)
 
 # STEP 2.8 — Save final dataset
 
+
+# -----------------------------------
+# BONUS: PCA for 2D visualization
+# -----------------------------------
+
+# Reduce the 13 features to 2 principal components
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+# Add PC1 and PC2 to the dataframe (optional but useful)
+data["PC1"] = X_pca[:, 0]
+data["PC2"] = X_pca[:, 1]
+
+# Show how much variance each principal component explains
+print("Explained variance ratio by PCA components:", pca.explained_variance_ratio_)
+print("Total variance explained by first 2 components:", pca.explained_variance_ratio_.sum())
+
+
+# Scatter plot of the two principal components, colored by cluster
+plt.figure(figsize=(8, 6))
+scatter = plt.scatter(
+    data["PC1"], 
+    data["PC2"], 
+    c=data["cluster"],    # color by cluster label (0 or 1)
+    cmap="viridis",
+    alpha=0.7
+)
+
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+plt.title("Customer Segments Visualized in PCA Space")
+
+# Add legend for clusters
+legend1 = plt.legend(*scatter.legend_elements(), title="Cluster")
+plt.gca().add_artist(legend1)
+
+plt.show()
+
 data.to_csv("clustered_data.csv", index=False)
 print("Step 2 complete! File saved as clustered_data.csv")
+
+
+

@@ -62,3 +62,6 @@ print("Precision:", precision_score(y_test, y_pred_dt))
 print("Recall:", recall_score(y_test, y_pred_dt))
 print("F1 Score:", f1_score(y_test, y_pred_dt))
 print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_dt))
+
+#more models - randomfirst, logistic, svm, decision tree -> voting
+#check if over or under fitting is needed
