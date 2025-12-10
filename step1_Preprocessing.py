@@ -78,12 +78,3 @@ data.to_csv("cleaned_data.csv", index=False)
 print("Step 1 completed successfully.")
 
 #Edge for date 
-
-
-
-
-    
-
-    
-
-

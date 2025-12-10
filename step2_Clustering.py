@@ -141,6 +141,4 @@ plt.show()
 
 data.to_csv("clustered_data.csv", index=False)
 print("Step 2 complete! File saved as clustered_data.csv")
-
-
-
+☺️
