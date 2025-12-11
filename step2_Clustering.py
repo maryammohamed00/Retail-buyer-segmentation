@@ -139,6 +139,12 @@ plt.gca().add_artist(legend1)
 
 plt.show()
 
+
+#NEW
+last_user_cluster = data.iloc[-1]["cluster"]
+print("\nNew user assigned to cluster:", last_user_cluster)
+
+
 data.to_csv("clustered_data.csv", index=False)
 print("Step 2 complete! File saved as clustered_data.csv")
-☺️
+

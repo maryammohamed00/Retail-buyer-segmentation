@@ -89,3 +89,13 @@ print("Precision:", precision_score(y_test, y_pred_rf,  pos_label=1))
 print("Recall:", recall_score(y_test, y_pred_rf,  pos_label=1))
 print("F1 Score:", f1_score(y_test, y_pred_rf,  pos_label=1))
 print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_rf))
+
+#NEW
+# Predict cluster for the new user using Random Forest model:
+new_user = X.tail(1)                  # آخر صف
+new_user_scaled = scaler.transform(new_user)
+
+print("\nModel Prediction for NEW USER:")
+print("KNN:", knn.predict(new_user_scaled)[0])
+print("Decision Tree:", dt.predict(new_user)[0])
+print("Random Forest:", rf.predict(new_user)[0])

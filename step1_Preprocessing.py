@@ -1,4 +1,6 @@
 import pandas as pd
+#NEW
+import numpy as np 
 import datetime
 
 # Replace 'your_file.csv' with the path to your training data file
@@ -18,6 +20,12 @@ print(data.isnull().sum())
 
 #Replace missing values with the mean of its column if numeric. 
 data.fillna(data.mean(numeric_only=True), inplace=True)
+
+
+#NEW
+#Replace missing values with the mode of its column if numeric or text.
+data.fillna(data.mode().iloc[0], inplace=True)
+
 
 print("Duplicated rows:",data.duplicated().sum())
 data = data.drop_duplicates()
@@ -73,8 +81,51 @@ for col in ['annual_income', 'spend_wine', 'spend_meat',
     if col in data.columns:
         cap_outliers_iqr(data, col)
 
+#Edge for date 
+
+
+#NEW
+# ============================
+#   ADDED: USER INPUT SECTION
+# ============================
+
+print("\n--- Add NEW User Data ---")
+print("Enter customer info (you may leave blank or enter anything):")
+
+user_input = {
+    "annual_income": input("Annual income: "),
+    "total_spend": input("Total spend: "),
+    "total_purchases": input("Total purchases: "),
+    "family_size": input("Family size: "),
+    "age": input("Age: "),
+    "num_discount_purchases": input("Discount purchases: "),
+    "days_since_last_purchase": input("Days since last purchase: "),
+    "web_visits_last_month": input("Web visits last month: ")
+}
+
+user_row = pd.DataFrame([user_input])
+
+# -------- AUTO CLEANING -------
+
+numeric_cols = [
+    "annual_income", "total_spend", "total_purchases", "family_size",
+    "age", "num_discount_purchases", "days_since_last_purchase",
+    "web_visits_last_month"
+]
+
+for col in numeric_cols:
+    # convert invalid → NaN
+    user_row[col] = pd.to_numeric(user_row[col], errors='coerce')
+
+    # replace NaN with mean
+    if user_row[col].isna().any():
+        user_row[col] = data[col].mean()
+
+# append new data to cleaned df
+data = pd.concat([data, user_row], ignore_index=True)
 data.to_csv("cleaned_data.csv", index=False)
 
-print("Step 1 completed successfully.")
+print("\nUser record cleaned and added successfully!")
+print(user_row)
 
-#Edge for date 
+print("\n✓ Step 1 Finalized (with user input).")
