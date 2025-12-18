@@ -2,6 +2,10 @@ import pandas as pd
 #NEW
 import numpy as np 
 import datetime
+# Add these imports
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+
 
 # Replace 'your_file.csv' with the path to your training data file
 data = pd.read_csv('data.csv')
@@ -19,12 +23,24 @@ print(data.describe())
 print(data.isnull().sum())
 
 #Replace missing values with the mean of its column if numeric. 
-data.fillna(data.mean(numeric_only=True), inplace=True)
+#data.fillna(data.mean(numeric_only=True), inplace=True)
 
 
 #NEW
 #Replace missing values with the mode of its column if numeric or text.
-data.fillna(data.mode().iloc[0], inplace=True)
+#data.fillna(data.mode().iloc[0], inplace=True)
+
+#fix 1 - for handling outliers and missing values - K
+# 1️⃣ Model-based imputation for numeric columns
+numeric_cols = data.select_dtypes(include=["number"]).columns
+
+# Iterative Imputer (MICE)
+imputer = IterativeImputer(random_state=42, max_iter=10, initial_strategy='mean')
+data[numeric_cols] = imputer.fit_transform(data[numeric_cols])
+
+categorical_cols = data.select_dtypes(include=["object"]).columns
+for col in categorical_cols:
+    data[col] = data[col].fillna(data[col].mode()[0])
 
 
 print("Duplicated rows:",data.duplicated().sum())
@@ -117,14 +133,28 @@ for col in numeric_cols:
     # convert invalid → NaN
     user_row[col] = pd.to_numeric(user_row[col], errors='coerce')
 
-    # replace NaN with mean
-    if user_row[col].isna().any():
-        user_row[col] = data[col].mean()
+   # Model-based imputation for new user numeric fields
+    user_row[numeric_cols] = imputer.transform(user_row[numeric_cols].fillna(0))  # temporary fill NaN
+
+    #fix 2 - to ensure no negatives after conversion - K
+    user_row[col] = user_row[col].clip(lower=0)
+
 
 # append new data to cleaned df
 data = pd.concat([data, user_row], ignore_index=True)
-data.to_csv("cleaned_data.csv", index=False)
 
+
+#fix 3 - Outlier Handling for the new user data - K
+for col in ['annual_income', 'spend_wine', 'spend_meat',
+            'spend_fruits','spend_fish', 'spend_sweets', 'spend_gold', 
+            'num_web_purchases', 'num_store_purchases', 
+            'num_catalog_purchases','num_discount_purchases',
+            'days_since_last_purchase','web_visits_last_month',
+            'total_spend', 'total_purchases', 'age','family_size']:
+    if col in data.columns:
+        cap_outliers_iqr(data, col)
+
+data.to_csv("cleaned_data.csv", index=False)
 print("\nUser record cleaned and added successfully!")
 print(user_row)
 
