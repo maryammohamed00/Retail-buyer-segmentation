@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.ensemble import RandomForestClassifier
@@ -26,16 +27,22 @@ features = [
 X = data[features]
 y = data['cluster']
 
-# Scaling for models
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+# Impute missing values
+imputer = SimpleImputer(strategy="mean")
+X_imputed = imputer.fit_transform(X)  
 
-# Train final models (for demo purposes, retrain on all data)
+# Scale the imputed data
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X_imputed)  
+
+# KMeans uses scaled, imputed data
 kmeans = KMeans(n_clusters=len(data['cluster'].unique()), random_state=42)
 data['cluster'] = kmeans.fit_predict(X_scaled)
 
+# Random Forest can use imputed data
 rf = RandomForestClassifier(n_estimators=200, random_state=42)
-rf.fit(X, y)
+rf.fit(X_imputed, y)
+
 
 # ===============================
 # STREAMLIT UI

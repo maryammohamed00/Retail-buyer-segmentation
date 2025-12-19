@@ -94,7 +94,7 @@ print("F1 Score:", f1_score(y_test, y_pred_rf,  pos_label=1))
 print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_rf))
 
 #NEW
-# Predict cluster for the new user using Random Forest model:   ????????
+# Predict cluster for the new user using KNN, Decision Tree and Random Forest models:   
 #new_user = X.tail(1)                  
 new_user = data[[
     'annual_income',
