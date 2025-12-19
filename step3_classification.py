@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
@@ -21,6 +22,8 @@ X = data[[
     'web_visits_last_month'
 ]]
 
+imputer = SimpleImputer(strategy="mean")
+X = imputer.fit_transform(X)
 #Output
 y = data["cluster"]
 
@@ -91,11 +94,26 @@ print("F1 Score:", f1_score(y_test, y_pred_rf,  pos_label=1))
 print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred_rf))
 
 #NEW
-# Predict cluster for the new user using Random Forest model:
-new_user = X.tail(1)                  # آخر صف
-new_user_scaled = scaler.transform(new_user)
+# Predict cluster for the new user using Random Forest model:   ????????
+#new_user = X.tail(1)                  
+new_user = data[[
+    'annual_income',
+    'total_spend',
+    'total_purchases',
+    'family_size',
+    'age',
+    'num_discount_purchases',
+    'days_since_last_purchase',
+    'web_visits_last_month'
+]].tail(1)
+
+# Apply SAME imputer and scaler
+new_user_imputed = imputer.transform(new_user)
+new_user_scaled = scaler.transform(new_user_imputed)
+# For Decision Tree and Random Forest, use unscaled
+new_user_array = new_user_imputed  # define it properly
 
 print("\nModel Prediction for NEW USER:")
 print("KNN:", knn.predict(new_user_scaled)[0])
-print("Decision Tree:", dt.predict(new_user)[0])
-print("Random Forest:", rf.predict(new_user)[0])
+print("Decision Tree:", dt.predict(new_user_array)[0])
+print("Random Forest:", rf.predict(new_user_array)[0])
